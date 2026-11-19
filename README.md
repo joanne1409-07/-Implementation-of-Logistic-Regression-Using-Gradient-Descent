@@ -1,48 +1,61 @@
-# Implementation-of-Logistic-Regression-Model-to-Predict-the-Placement-Status-of-Student
+# Implementation-of-Logistic-Regression-Using-Gradient-Descent
 ## AIM:
-To write a program to implement the the Logistic Regression Model to Predict the Placement Status of Student.
+To write a program to implement the the Logistic Regression Using Gradient Descent.
 
 ## Equipments Required:
 Hardware – PCs
 Anaconda – Python 3.7 Installation / Jupyter notebook
 ## Algorithm
-1.Load the student placement dataset and preprocess the data
+1.Load and preprocess the placement dataset
 
-2.Split the dataset into training and testing sets
+2.Train Logistic Regression using Gradient Descent
 
-3.Train the Logistic Regression model using training data
+3.Get student details from user and predict placement status
 
-4.Predict the placement status and evaluate the model using confusion matrix
+4.Generate the confusion matrix
 
 ## Program:
 ```
-Program to implement the the Logistic Regression Model to Predict the Placement Status of Student.
-Developed by: JOANNE JAISON 
+Program to implement the the Logistic Regression Using Gradient Descent.
+Developed by: JOANNE JAISON
 RegisterNumber:  212225020017
+
 import pandas as pd
-from sklearn.model_selection import train_test_split
-from sklearn.linear_model import LogisticRegression
+import numpy as np
 from sklearn.metrics import confusion_matrix, accuracy_score, precision_score, recall_score
 
 # Load dataset
-data = pd.read_csv("C:/Users/acer/Downloads/Placement_Data.csv")
+data = pd.read_csv("C:/Users/acer/Downloads/Placement_Data (1).csv")
 
 # Convert categorical values to numeric
 data['gender'] = data['gender'].map({'M': 1, 'F': 0})
 data['status'] = data['status'].map({'Placed': 1, 'Not Placed': 0})
 
-# Independent and dependent variables
-X = data[['gender', 'ssc_p', 'hsc_p', 'degree_p', 'etest_p', 'mba_p']]
-y = data['status']
+# Select features and target
+X = data[['gender', 'ssc_p', 'hsc_p', 'degree_p', 'mba_p']].values
+y = data['status'].values
 
-# Split dataset
-X_train, X_test, y_train, y_test = train_test_split(
-    X, y, test_size=0.3, random_state=0
-)
+# Normalize features
+X = (X - X.mean(axis=0)) / X.std(axis=0)
 
-# Logistic Regression model
-model = LogisticRegression(max_iter=1000)
-model.fit(X_train, y_train)
+# Add bias term
+X = np.c_[np.ones(X.shape[0]), X]
+
+# Initialize parameters
+weights = np.zeros(X.shape[1])
+learning_rate = 0.01
+epochs = 1000
+
+# Sigmoid function
+def sigmoid(z):
+    return 1 / (1 + np.exp(-z))
+
+# Gradient Descent training
+for _ in range(epochs):
+    z = np.dot(X, weights)
+    predictions = sigmoid(z)
+    gradient = np.dot(X.T, (predictions - y)) / y.size
+    weights -= learning_rate * gradient
 
 # ---------------- USER INPUT ----------------
 print("\nEnter Student Details:")
@@ -53,37 +66,42 @@ gender = 1 if gender.upper() == 'M' else 0
 ssc_p = float(input("SSC Percentage: "))
 hsc_p = float(input("HSC Percentage: "))
 degree_p = float(input("Degree Percentage: "))
-etest_p = float(input("E-Test Percentage: "))
 mba_p = float(input("MBA Percentage: "))
 
-user_data = pd.DataFrame([[gender, ssc_p, hsc_p, degree_p, etest_p, mba_p]],
-                         columns=['gender', 'ssc_p', 'hsc_p', 'degree_p', 'etest_p', 'mba_p'])
+# Normalize user input
+user_input = np.array([gender, ssc_p, hsc_p, degree_p, mba_p])
+user_input = (user_input - data[['gender','ssc_p','hsc_p','degree_p','mba_p']].mean().values) / \
+             data[['gender','ssc_p','hsc_p','degree_p','mba_p']].std().values
 
-user_prediction = model.predict(user_data)
+# Add bias
+user_input = np.insert(user_input, 0, 1)
 
-if user_prediction[0] == 1:
+# Prediction
+result = sigmoid(np.dot(user_input, weights))
+
+if result >= 0.5:
     print("\nPlacement Status: PLACED")
 else:
     print("\nPlacement Status: NOT PLACED")
 
 # ---------------- MODEL EVALUATION ----------------
-y_pred = model.predict(X_test)
+y_pred = sigmoid(np.dot(X, weights)) >= 0.5
 
 # Confusion Matrix
-cm = confusion_matrix(y_test, y_pred)
+cm = confusion_matrix(y, y_pred)
 print("\nConfusion Matrix:")
 print(cm)
 
 # Accuracy
-accuracy = accuracy_score(y_test, y_pred)
+accuracy = accuracy_score(y, y_pred)
 print("\nAccuracy:", accuracy)
 
 # Precision
-precision = precision_score(y_test, y_pred)
+precision = precision_score(y, y_pred)
 print("Precision:", precision)
 
 # Sensitivity (Recall)
-sensitivity = recall_score(y_test, y_pred)
+sensitivity = recall_score(y, y_pred)
 print("Sensitivity (Recall):", sensitivity)
 
 # Specificity
@@ -91,9 +109,8 @@ TN, FP, FN, TP = cm.ravel()
 specificity = TN / (TN + FP)
 print("Specificity:", specificity)
 ```
-
 ## Output:
-<img width="802" height="486" alt="Screenshot 2026-11-19 154452" src="https://github.com/user-attachments/assets/5eed6ccc-f27e-4229-892f-349ea06db0e8" />
+<img width="802" height="486" alt="Screenshot 2026-11-19 154452" src="https://github.com/user-attachments/assets/444a4098-4b88-496f-9cb9-26039ac9a02d" />
 
 ## Result:
-Thus the program to implement the the Logistic Regression Model to Predict the Placement Status of Student is written and verified using python programming.
+Thus the program to implement the the Logistic Regression Using Gradient Descent is written and verified using python programming.
